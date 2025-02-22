@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Se connecter{% endblock %}
+
+{% block content %}
+<style type="text/css">
+	input[type="text"],input[type="email"],input[type="password"]{width:75%}
+	#maincont{
+		width: 50%;
+	}
+	@media only screen and (max-width: 1024px){
+		#maincont{
+			width: 90%;
+		}
+	}
+	a:hover{color: var(--text-color);}
+</style>
+	<div class="container p-6">
+		<div class="p-4" style="margin: 0 auto" id="maincont">
+			<div class="has-text-centered">
+				<strong class="is-size-5">Se connecter à Leswaq</strong>
+				<p class="has-text-weight-semibold mb-5">Un moyen facile pour acheter et vendre</p>
+
+				<form method="POST">
+					{% csrf_token %}
+						{% if login_form.non_field_errors %}
+							<b style="color: red;">
+								<ul style="margin:0px;padding: 0px" class="errorlist nonfield">
+									<li style="list-style-type: none">Nom d'utilisateur ou mot de passe érroné</li>
+								</ul>
+							</b>
+						{% endif %}
+						<input type="text" name="username" maxlength="30" required id="id_username" class="input mb-4" placeholder="Email ou nom d'utilisateur">
+						<input type="password" name="password" required id="id_password" class="input mb-4" placeholder="Mot de passe">
+					<div class=" has-text-centered">
+						<button type="submit" class="button is-dark px-5 is-radiusless">Se connecter</button>
+					</div>
+				</form><br>
+				<b><a href="{% url 'account:password_reset' %}">Mot de passe oublié ?</a></b>
+			</div>
+		</div>
+	</div>
+{% endblock %}

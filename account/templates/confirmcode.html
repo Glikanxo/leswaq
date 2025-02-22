@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Confirmation d'identité{% endblock %}
+
+{% block content %}
+	<section class="hero is-medium mt-6">
+	  <div class="hero-body has-text-centered" style="padding: 2rem 1.5rem 15rem 1.5rem;">
+	  	<h1 class="subtitle has-text-black">Confirmez votre code d'identité</h1>
+	  	<b class="has-text-success" id="success" style="display:none">Votre identitée a été confirmée avec success</b>
+	  	<b class="has-text-danger" id="fail" style="display:none">Votre code est érroné</b>
+	  	<p>Le code de confirmation est dans la lettre que vous avez reçu par poste</p><br>
+	  	<form method="post" id="confirm">
+	  		{% csrf_token %}
+	  		<input type="text" id="code" class="input" maxlength="6" style="width:7rem;text-transform: uppercase">
+	  		<button type="submit" name="confirmation" class="button is-success">Valider</button>
+	  	</form>
+	  </div>
+	</section>
+
+	<script type="text/javascript">
+		
+		$(document).on('submit', '#confirm',function(e){
+			e.preventDefault();
+	    $.ajax({
+	        type:'POST',
+	        url:'{% url "account:confirmcode" %}',
+	        data:{
+	            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+	            action: 'confirm',
+	            code: $('#code').val()
+	        },
+	        success:function(json){
+	        	if (json.stat == 'success'){
+	        		document.getElementById('success').style.display="block";
+	        		document.getElementById('confirm').style.display="none";
+	        	}else{
+	        		document.getElementById('fail').style.display="block";
+	        	}	
+	        },
+	    })})
+	</script>
+{% endblock %}

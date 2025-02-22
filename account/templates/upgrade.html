@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mise à niveau{% endblock %}
+
+{% block content %}
+	<h1 class="title has-text-centered" style="margin-top: 75px;">Mettez à niveau votre compte</h1>
+	<div class="columns has-text-centered"style="margin-top: 20px;justify-content: center;">
+		<div class="column is-3">
+			<h2 class="title is-4 has-text-weight-bold mb-0">Vendeur en-ligne</h2>
+			<p class="has-text-weight-light">Vendez vos produits plus facilement</p>
+			<h3 class="title is-4 has-text-weight-bold my-4" style="color:#219BCC!important">0000 Dzd/mois</h3>
+
+			<ul>
+				<li><p>Peut enregistrer les publications</p></li>
+				<li><p>15 publications d'urgence</p></li>
+				<li><p>Historique de produits achetés</p></li>
+				<li><p>Peut choisir son audience (Age et Sexe)</p></li>
+				<li><p>Choix de wilaya de l'audience</p></li>
+			</ul>
+
+			<button class="button is-primary mt-3" onclick="obtenir('online_seller')">Obtenir maintenant</button>
+		</div>
+		<div class="column is-4 has-text-white" style="background: #003049;">
+			<h2 class="title is-4 has-text-weight-bold mb-0" style="color:white!important">Mode Sécurisé</h2>
+			<p class="has-text-weight-light">Le plan idéal pour vous</p>
+			<h3 class="title is-4 has-text-weight-bold my-4" style="color:#F77F00!important">0000 Dzd/mois</h3>
+
+			<ul>
+				<li>Peut enregistrer les publications</li>
+				<li>5 publications d'urgence</li>
+				<li>Historique de produits achetés</li>
+				<li>Peut choisir son audience (Age et Sexe)</li>
+				<li>.</li>
+			</ul>
+
+			<button class="button is-warning mt-3" onclick="obtenir('secure')">Obtenir maintenant</button>
+		</div>
+		<div class="column is-3">
+			<h2 class="title is-4 has-text-weight-bold mb-0">Entreprise</h2>
+			<p class="has-text-weight-light">Le pack parfait pour etandre votre business</p>
+			<h3 class="title is-4 has-text-weight-bold my-4" style="color:#219BCC!important">0000 Dzd/mois</h3>
+
+			<ul>
+				<li><p>Peut enregistrer les publications</p></li>
+				<li><p>15 publications d'urgence</p></li>
+				<li><p>Historique de produits achetés</p></li>
+				<li><p>Résultats en premier</p></li>
+				<li><p>*Nécessite un registre de commerce</p></li>
+			</ul>
+
+			<button class="button is-primary mt-3" onclick="obtenir('entreprise')">Obtenir maintenant</button>
+		</div>
+	</div>
+	<div class="container my-6">
+		<h3 class="title is-4 has-text-weight-bold mb-0">Besoin spéciales ?</h3>
+		<p class="has-text-weight-semibold">Le mode est gratuit si vous avez déja payé un abonnement dans un autre mode.<br>Faites preuve de votre incapacité pour obtenir le mode.</p>
+		<button class="button is-primary mt-3" onclick="obtenir('special_needs')">Obtenir maintenant</button>
+	</div>
+
+    <div class="modal" id="obtenirmodal">
+      <div class="modal-background" onclick="obtenir('close')"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Mise à niveau</p>
+          <button class="delete" aria-label="close" onclick="obtenir('close')"></button>
+        </header>
+        <div id='modalbody'>
+        <section class="modal-card-body" >
+          <form method="POST" id="obtenirform" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="mode" value="">
+            <b class="has-text-danger" style="display:none" id="errornin">Votre NIN est incorrect veuillez le verifier</b><br>
+            <b class="has-text-info" style="display:none" id="sccss">Veuillez patienter le traitement de vos données<br></b>
+            <label><b class="has-text-dark">Attachement :</b></label><br>
+            <small>Veuillez attacher le reçu du paiement ou la preuve de l'incapacité</small>
+            <input type="file" name="attachement" accept="image/*" required><br>
+            <label><b class="has-text-dark">Numéro d'identification national (NIN) :</b></label><br>
+            <input type="text" name="nin" required class="input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" maxlength="18">
+            <label><b class="has-text-dark">Adresse :</b></label><br>
+            <input type="text" name="adresse" required class="input" maxlength="100">
+        </section>
+        <footer class="modal-card-foot">
+          <button type="submit" class="button is-success" name="obtenir">Envoyer</button>
+          </form>
+          <button class="button" onclick="obtenir('close')">Annuler</button>
+        </footer>
+    	</div>
+      </div>
+    </div>
+
+<script type="text/javascript">
+		$(document).on('submit', '#obtenirform',function(e){
+			e.preventDefault();
+  		var formData = new FormData(document.getElementById('obtenirform'));
+    	formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    	formData.append('action', 'submit');
+	    $.ajax({
+	        type:'POST',
+	        url:'{% url "account:upgrade" %}',
+	        data:{
+	            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+	            action: 'check',
+	            nin: $('input[name=nin]').val(),
+	        },
+	        success:function(json){
+	        	if(json.status == 'success'){
+	        		document.getElementById('errornin').style.display="none";
+	        		document.getElementById('sccss').style.display="block";
+	        		$.ajax({
+					        type:'POST',
+					        url:'{% url "account:upgrade" %}',
+					        data:formData,
+									    cache: false,
+									    contentType: false,
+									    processData: false,
+					        success:function(json){
+					        	if(json.status == 'success'){
+					        	}else if (json.status == 'fail'){
+					        		document.getElementById('errornin').style.display="block";
+					        	}
+					        },
+					    })
+	        	}else if (json.status == 'fail'){
+	        		document.getElementById('errornin').style.display="block";
+	        	}
+	        },
+	    })})
+
+
+	function obtenir(param){
+        document.getElementById('obtenirmodal').classList.toggle('is-active');
+        if(param!='close'){
+        	document.querySelector("input[name='mode']").value = param;
+        }
+	}
+</script>
+{% endblock %}

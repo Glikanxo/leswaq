@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}{{user}}{% endblock %}
+
+{% block content %}
+<style type="text/css">
+	#profile_pic{
+		border-radius: 30%;
+	}
+
+	.card{
+		width: 20%;display: inline-block;margin-left: 4%;margin-bottom: 15px;border-radius: 0;padding: 0;background: none;box-shadow: none
+	}
+	.card:nth-child(4n+1){margin-left: 3%}
+	.card:nth-child(4n){margin-left: 4%;margin-right: 3%}
+</style>
+	<div class="has-background-grey-dark has-text-white has-text-centered">
+		<div class="p-5">
+			<div style="width: 125px ;margin: 0 auto">
+				<div class="image is-1by1" style="position: relative;">
+					{% if user.profile_pic %}
+						<img loading="lazy" src="{{user.profile_pic.url}}" id="profile_pic">
+					{% else %}
+						<img loading="lazy" src="{% static 'placeholderimg.png' %}" id="profile_pic">
+					{% endif %}
+					{% if request.user == user %}
+						<span class="icon" style="position: absolute;top:-5%;right: -5%;font-size: 20px;background: black;padding: 15px;border-radius: 50%;cursor: pointer;" onclick="editpp()">
+							<i class="fas fa-pencil-alt"></i>
+						</span>
+					{% endif %}
+				</div>
+			</div>
+			<h1 class="has-text-weight-bold">{{user.first_name}} {{user.last_name}}</h1>
+			<p>{{user.commune}},{{user.wilaya}}</p>
+			{% if mode == 'kid' %}
+			<b class="has-text-info">[Compte d'enfant]</b>
+			{% endif %}
+			<p class="has-text-white mt-2">Securité :
+				{% if securite == 'forte' %}
+					<strong class="has-text-success"> Forte</strong>
+				{% elif securite == 'moyenne' %}
+					<strong class="has-text-grey"> Moyenne</strong>
+				{% elif securite == 'faible' %}
+					<strong class="has-text-danger"> Faible</strong>
+				{% endif %}
+			</p>
+			<p class="has-text-white mt-1">Notes :
+				{% if rating > 0 %}
+					<strong class="has-text-success"> Plutôt positives</strong>
+				{% elif rating == 0 %}
+					<strong class="has-text-grey"> Neutres</strong>
+				{% elif rating < 0 %}
+					<strong class="has-text-danger"> Plutôt négatives</strong>
+				{% endif %}
+			</p>
+			<p><b>Ventes: </b>{{vente_count}}<b> Achats: </b>{{achat_count}}</p>
+			{% if user.is_authenticated %}
+				{% if user != request.user %}
+					{% csrf_token %}
+					<div class="mt-2 is-hidden-tablet">
+							<button class="button is-dark" onclick="down()">
+								<span class="icon has-text-danger" id="downmob">
+									{% if state == 'down' %}
+									<i class="fas fa-thumbs-down fa-flip-horizontal"></i>
+									{% else %}
+									<i class="far fa-thumbs-down fa-flip-horizontal"></i>
+									{% endif %}
+								</span>
+							</button>
+							<button class="button is-dark" onclick="up()">
+								<span class="icon has-text-success" id="upmob">
+									{% if state == 'up' %}
+									<i class="fas fa-thumbs-up"></i>
+									{% else %}
+									<i class="far fa-thumbs-up"></i>
+									{% endif %}
+								</span>
+							</button></div>
+					<div class="mt-2">
+							<button class="button is-dark is-hidden-mobile" onclick="down()">
+								<span class="icon has-text-danger" id="down">
+									{% if state == 'down' %}
+									<i class="fas fa-thumbs-down fa-flip-horizontal"></i>
+									{% else %}
+									<i class="far fa-thumbs-down fa-flip-horizontal"></i>
+									{% endif %}
+								</span>
+							</button>
+				<div id="subbtn" style="display: inline-block;">
+					{% if subscription %}
+						<button class="button is-radiusless is-primary" onclick="unsubscribe()">Ne plus suivre</button>
+					{% else %}
+						<button class="button is-radiusless is-primary" onclick="subscribe()">Suivre</button>
+					{% endif %}
+				</div>
+				{% if mode != 'kid' %}
+					{% if account_type != 'kid' %}
+						<a class="button is-radiusless is-info" href='{% url "chat:room" room_name=user.username %}'>Contacter</a>{% endif %}
+							<button class="button is-dark is-hidden-mobile" onclick="up()">
+								<span class="icon has-text-success" id="up">
+									{% if state == 'up' %}
+									<i class="fas fa-thumbs-up"></i>
+									{% else %}
+									<i class="far fa-thumbs-up"></i>
+									{% endif %}
+								</span>
+							</button>
+					</div>
+					{% endif %}
+				{% endif %}
+			{% endif %}
+		</div>
+
+    <nav class="tabs pb-1">
+      <div class="container">
+      	{% if page != 'saved' %}
+          <li style="display: inline-block;" class="tablinks is-active" onclick="openTab(event,'ventes')"><a class=" has-text-white">Ventes</a></li>
+          <li style="display: inline-block;" onclick="openTab(event,'achats')" class="tablinks"><a class=" has-text-white">Achats</a></li>
+          <li style="display: inline-block;" onclick="openTab(event,'urgences')" class="tablinks"><a class=" has-text-white">Annonces d'urgence</a></li>
+        {% else %}
+          <li style="display: inline-block;" class="tablinks is-active"><a class=" has-text-white">Enregistrements</a></li>
+        {% endif %}
+      </div>
+    </nav>
+	</div>
+	{% if page != 'saved' %}
+	<div id="ventes" class="tabcontent container">
+		<div class="mt-4">
+			{% for i in ventes %}
+				<a href="{% url 'core:post' slug=i.slug %}">
+					<div class="card has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+							<img loading="lazy" src="{{i.images.all.0.image.url}}">
+					    </div>
+							<b>{{i.title}}</b>
+							<p>{{i.prix}} DZD</p>
+					    </div>
+					</div>
+				</a>
+			{% empty %}
+				<div class="has-text-centered my-6">
+					<h1 class="has-text-weight-bold is-size-5">Vous n'avez aucune annonce de vente</h1>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+	<div id="achats" class="tabcontent container" style="display: none">
+		<div class="mt-4">
+			{% for i in achats %}
+				<a href="{% url 'core:post' slug=i.slug %}">
+					<div class="card has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+							<img loading="lazy" src="{{i.images.all.0.image.url}}">
+					    </div>
+							<b>{{i.title}}</b>
+							<p>{{i.prix}} DZD</p>
+					    </div>
+					</div>
+				</a>
+			{% empty %}
+				<div class="has-text-centered my-6">
+					<h1 class="has-text-weight-bold is-size-5">Vous n'avez aucune annonce d'achat</h1>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+	<div id="urgences" class="tabcontent container" style="display: none">
+		<div class="mt-4">
+			{% for i in urgences %}
+				<a href="{% url 'core:post' slug=i.slug %}">
+					<div class="card has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+							<img loading="lazy" src="{{i.images.all.0.image.url}}">
+					    </div>
+							<b>{{i.title}}</b>
+							<p>{{i.prix}} DZD</p>
+					    </div>
+					</div>
+				</a>
+			{% empty %}
+				<div class="has-text-centered my-6">
+					<h1 class="has-text-weight-bold is-size-5">Vous n'avez aucune annonce d'urgence</h1>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+	{% else %}
+	<div id="saved" class="tabcontent container">
+		<div class="mt-4">
+			{% for i in saved %}
+				<a href="{% url 'core:post' slug=i.post.slug %}">
+					<div class="card has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+							<img loading="lazy" src="{{i.post.img1.url}}">
+					    </div>
+							<b>{{i.post.title}}</b>
+							<p>{{i.post.prix}} DZD</p>
+					    </div>
+					</div>
+				</a>
+			{% empty %}
+				<div class="has-text-centered my-6">
+					<h1 class="has-text-weight-bold is-size-5">Vous n'avez enregistré aucune annonce</h1>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+	{% endif %}
+	{% if request.user == user %}
+		<div class="modal" id="editppmodal">
+		  <div class="modal-background" onclick="editpp()"></div>
+		  <div class="modal-card">
+		    <header class="modal-card-head">
+		      <p class="modal-card-title">Modifier votre photo de profil</p>
+		      <button class="delete" aria-label="close" onclick="editpp()"></button>
+		    </header>
+		    <section class="modal-card-body">
+			<form method="post" enctype="multipart/form-data">
+		    		{% csrf_token %}
+		    	<input type="file" name="imgco" id="imgInp">
+		    	<div  style="width: 25%">
+			    	<div class="image is-1by1">
+			    		<img loading="lazy" src="" id="preview" style="display: none">
+			    	</div>
+			    </div>
+		    </section>
+		    <footer class="modal-card-foot">
+		      <button class="button is-success" type="submit" name="editpp">Envoyer</button>
+		      </form>
+		      <button class="button" onclick="editpp()">Annuler</button>
+		    </footer>
+		  </div>
+		</div>
+	{% endif %}
+	{% if request.user == user %}
+<script type="text/javascript">
+	imgInp.onchange = evt => {
+	  const [file] = imgInp.files
+	  if (file) {
+	    preview.src = URL.createObjectURL(file);
+	    preview.style.display='block';
+	  }
+	}
+	function editpp(){
+		document.getElementById('editppmodal').classList.toggle('is-active');
+	}
+</script>
+	{% endif %}
+<script type="text/javascript">
+	function subscribe(){
+			$.ajax({
+	        type:'POST',
+	        url:'{% url "account:userprofil" user=user.username %}',
+	        data:{
+	            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+	            action: 'subscribe'
+	        },
+	        success:function(json){
+				document.getElementById('subbtn').innerHTML='<button class="button is-radiusless is-primary" onclick="unsubscribe()">Ne plus suivre</button>';
+	        },
+		    }
+		    )
+		};
+	function down(){
+			$.ajax({
+	        type:'POST',
+	        url:'{% url "account:down" %}',
+	        data:{
+	            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+	            action: 'down',
+	            account:'{{user.username}}'
+	        },
+	        success:function(json){
+	        	if(json.stat == 'neutral'){
+	        		document.getElementById('down').innerHTML='<i class="far fa-thumbs-down fa-flip-horizontal"></i>';
+	        		document.getElementById('up').innerHTML='<i class="far fa-thumbs-up"></i>';
+	        		document.getElementById('downmob').innerHTML='<i class="far fa-thumbs-down fa-flip-horizontal"></i>';
+	        		document.getElementById('upmob').innerHTML='<i class="far fa-thumbs-up"></i>';
+	        	}else{
+	        		document.getElementById('down').innerHTML='<i class="fas fa-thumbs-down fa-flip-horizontal"></i>';
+	        		document.getElementById('up').innerHTML='<i class="far fa-thumbs-up"></i>';
+	        		document.getElementById('downmob').innerHTML='<i class="fas fa-thumbs-down fa-flip-horizontal"></i>';
+	        		document.getElementById('upmob').innerHTML='<i class="far fa-thumbs-up"></i>';
+	        	}
+	        },
+		    }
+		    )
+		};
+	function up(){
+			$.ajax({
+	        type:'POST',
+	        url:'{% url "account:up" %}',
+	        data:{
+	            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+	            action: 'up',
+	            account:'{{user.username}}'
+	        },
+	        success:function(json){
+	        	if(json.stat == 'neutral'){
+	        		document.getElementById('down').innerHTML='<i class="far fa-thumbs-down fa-flip-horizontal"></i>';
+	        		document.getElementById('up').innerHTML='<i class="far fa-thumbs-up"></i>';
+	        		document.getElementById('downmob').innerHTML='<i class="far fa-thumbs-down fa-flip-horizontal"></i>';
+	        		document.getElementById('upmob').innerHTML='<i class="far fa-thumbs-up"></i>';
+	        	}else{
+	        		document.getElementById('up').innerHTML='<i class="fas fa-thumbs-up"></i>';
+	        		document.getElementById('down').innerHTML='<i class="far fa-thumbs-down fa-flip-horizontal"></i>';
+	        		document.getElementById('upmob').innerHTML='<i class="fas fa-thumbs-up"></i>';
+	        		document.getElementById('downmob').innerHTML='<i class="far fa-thumbs-down fa-flip-horizontal"></i>';
+	        	}
+	        },
+		    }
+		    )
+		};
+	function unsubscribe(){
+		$.ajax({
+        type:'POST',
+        url:'{% url "account:userprofil" user=user.username %}',
+        data:{
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+            action: 'unsubscribe'
+        },
+        success:function(json){
+			document.getElementById('subbtn').innerHTML='<button class="button is-radiusless is-primary" onclick="subscribe()">Suivre</button>';
+        },
+	    }
+	    )
+	};
+</script>
+<script type="text/javascript">
+	function openTab(evt, tab) {
+	  var i, tabcontent, tablinks;
+	  tabcontent = document.getElementsByClassName("tabcontent");
+	  for (i = 0; i < tabcontent.length; i++) {
+	    tabcontent[i].style.display = "none";
+	  }
+	  tablinks = document.getElementsByClassName("tablinks");
+	  for (i = 0; i < tablinks.length; i++) {
+	    tablinks[i].className = tablinks[i].className.replace(" is-active", "");
+	  }
+	  document.getElementById(tab).style.display = "block";
+	  evt.currentTarget.className += " is-active";
+	}
+</script>
+{% endblock %}

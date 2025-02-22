@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}S'inscrire{% endblock %}
+
+{% block content %}
+<style type="text/css">
+	input[type="text"],input[type="email"],input[type="password"],input[type="number"],input[type="date"]{width:75%}
+	#maincont{
+		width: 50%;
+	}
+	@media only screen and (max-width: 1024px){
+		#maincont{
+			width: 90%;
+		}
+	}
+
+  input[type="date"] {
+     -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    min-height: 1.2em; 
+}
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+	input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+</style>
+	<div class="container p-6">
+		<div class="p-4" style="margin: 0 auto" id="maincont">
+			<div class="has-text-centered">
+				<strong class="is-size-5">S'inscrire pour Leswaq</strong>
+				<p class="has-text-weight-semibold mb-5">Un moyen facile pour acheter et vendre</p>
+
+				<form method="POST">
+					{% csrf_token %}
+						{% if registration_form.non_field_errors %}
+							<b style="color: red;">
+								<ul style="margin:0px;padding: 0px" class="errorlist nonfield">
+									<li style="list-style-type: none">Invalid Login</li>
+								</ul>
+							</b>
+						{% endif %}
+						{% for i in registration_form %}
+						    {% for error in i.errors %}
+						        <div>
+						            <li><strong>{{ error|escape }}</strong></li>
+						        </div>
+						    {% endfor %}
+						{% endfor %}
+					<input type="email" name="email" maxlength="60" required id="id_email" class="input mb-4" placeholder="Email">
+
+					<input type="text" name="username" maxlength="30" required id="id_username" class="input mb-4" placeholder="Nom d'utilisateur">
+
+					<input type="password" name="password1" required id="id_password1" class="input mb-4" placeholder="Mot de passe">
+
+					<input type="password" name="password2" required id="id_password2" class="input mb-4" placeholder="Confirmation">
+
+					<input type="text" name="first_name" maxlength="80" required id="id_first_name" class="input mb-4" placeholder="Prénom">
+
+					<input type="text" name="last_name" maxlength="80" required id="id_last_name" class="input mb-4" placeholder="Nom">
+						<input type="number" name="phone_number" min='500000000' required id="id_phone_number" class="input mb-4" placeholder="Numéro de téléphone">
+					<div class="mb-4">
+	    				<div class="select mr-6">
+							<select name="sexe" required id="id_sexe">
+								<option value="" selected>Sexe</option>
+
+								<option value="h">Homme</option>
+
+								<option value="f">Femme</option>
+							</select>
+						</div>
+
+	    				<div class="select">
+							<select name="wilaya" required id="id_wilaya">
+								<option disabled selected>Wilaya</option>
+								{% for i in wilayas %}
+								<option value="{{i}}">{{i}}</option>
+								{% endfor %}
+							</select>
+						</div>
+
+					</div>
+						<input type="text" name="birth_date" required id="id_birth_date" class="input mb-4" onfocus="onFocus(this)" onblur="onBlur(this)" placeholder="Date de naissance">
+					<input type="text" name="commune" maxlength="80" required id="id_commune" class="input" placeholder="Commune">
+					<br>
+					<input type="checkbox" id="agree" onchange="this.checked?document.getElementById('subbut').disabled = false:document.getElementById('subbut').disabled = true"><label for="agree" class="ml-2"><b>J’ai lu et j’accepte la <a href="{% url 'core:politique' %}" class="has-text-info">politique de confidentialité</a> et les <a href="{% url 'core:conditions' %}" class="has-text-info">conditions d’utilisation</a></b></label>
+					<div class="has-text-centered"><br>
+						<button type="submit" class="button is-dark px-5 is-radiusless" disabled id="subbut"><b>S'inscrire</b></button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		function onFocus(evt){
+			evt.type='date'; 
+		}
+		function onBlur(evt){
+			evt.type='text';
+		}
+	</script>
+{% endblock %}
