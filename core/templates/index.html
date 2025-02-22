@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+<style type="text/css">
+  	.hidden-scroll::-webkit-scrollbar{display: none;}
+  	.nav-left{left:10%}
+  	.nav-right{right:10%}
+  	.slide-item{display: inline-block;}
+  	.nav{position: absolute;margin-top: 80px;background: black; border-radius: 50%;padding: 5px}
+  	img{
+  		height: 75px;
+  		width: 75px
+  	}
+
+	.cards{
+		width: 20%;display: inline-block;margin-left: 4%;margin-bottom: 15px;border-radius: 0;padding: 0;background: none;box-shadow: none;
+	}
+	.cards:nth-child(4n+1){margin-left: 3%}
+	.cards:nth-child(4n){margin-left: 4%;margin-right: 3%}
+	#produitsdivers a{vertical-align: top}
+  	.container div strong{margin-left: 12.5%}
+	@media only screen and (max-width: 1024px){
+		.is-1by1{padding-top: 133.3333%!important}
+		#scrollcontent div a .cards,#scrollcontent2 div a .cards{margin-right: 5%}
+  		.nav{margin-top: 40px}
+  	.container div strong{margin-left: 0%}
+	}
+	@media only screen and (max-width: 767px){
+		#scrollcontent div a .cards,#scrollcontent2 div a .cards{margin-right: 10%}
+	}
+</style>
+	<div class="container">
+		<div class="mx-6" style="margin-top: 75px">
+			<strong>Publications d'urgence</strong>
+	  		<div style="overflow-x: auto;white-space: nowrap;overflow-y: hidden; width: 75%;margin:0 auto;" class=" has-text-centered hidden-scroll" id="scrollcontent">
+	  			<div style="margin-top: 20px">
+		  			<a class="nav has-text-white nav-left" id="nav-left">
+		  				<span class="icon">
+		                  <i class="fas fa-arrow-left"></i>
+		                </span>
+		            </a>
+		  			<a class="nav has-text-white nav-right" id="nav-right">
+		  				<span class="icon">
+		                  <i class="fas fa-arrow-right"></i>
+		                </span>
+		            </a>
+
+					<a>
+						<div class="cards has-text-left">
+						    <div class="image is-1by1-mobile">
+						      <img src="{% static 'hoodie.jpg' %}">
+						    </div>
+						      <b>Hoodie gris</b>
+						      <p>2800 DZD</p>
+						</div>
+					</a>
+					<a>
+						<div class="cards has-text-left">
+						    <div class="content">
+						    <div class="image is-1by1">
+						      <img src="{% static 'hoodie.jpg' %}">
+						    </div>
+						      <b>Hoodie gris</b>
+						      <p>2800 DZD</p>
+						    </div>
+						</div>
+					</a>
+					<a>
+						<div class="cards has-text-left">
+						    <div class="content">
+						    <div class="image is-1by1">
+						      <img src="{% static 'hoodie.jpg' %}">
+						    </div>
+						      <b>Hoodie gris</b>
+						      <p>2800 DZD</p>
+						    </div>
+						</div>
+					</a>
+					<a>
+						<div class="cards has-text-left">
+						    <div class="content">
+						    <div class="image is-1by1">
+						      <img src="{% static 'hoodie.jpg' %}">
+						    </div>
+						      <b>Hoodie gris</b>
+						      <p>2800 DZD</p>
+						    </div>
+						</div>
+					</a>
+					<a>
+						<div class="cards has-text-left">
+						    <div class="content">
+						    <div class="image is-1by1">
+						      <img src="{% static 'hoodie.jpg' %}">
+						    </div>
+						      <b>Hoodie gris</b>
+						      <p>2800 DZD</p>
+						    </div>
+						</div>
+					</a>
+					<a>
+						<div class="cards has-text-left">
+						    <div class="content">
+						    <div class="image is-1by1">
+						      <img src="{% static 'hoodie.jpg' %}">
+						    </div>
+						      <b>Hoodie gris</b>
+						      <p>2800 DZD</p>
+						    </div>
+						</div>
+					</a>
+		  		</div>
+	  		</div>
+		</div>
+		<div class="mb-6 mx-6">
+			<strong>Publications de vendeurs en ligne</strong>
+	  		<div style="overflow-x: auto;white-space: nowrap;overflow-y: hidden; width: 75%;margin:0 auto;" class=" has-text-centered hidden-scroll" id="scrollcontent2">
+	  			<div style="margin-top: 20px">
+		  			<a class="nav has-text-white nav-left" id="nav2-left">
+		  				<span class="icon">
+		                  <i class="fas fa-arrow-left"></i>
+		                </span>
+		            </a>
+		  			<a class="nav has-text-white nav-right" id="nav2-right">
+		  				<span class="icon">
+		                  <i class="fas fa-arrow-right"></i>
+		                </span>
+		            </a>
+					<a>
+						<div class="cards has-text-left">
+						    <div class="content">
+						    <div class="image is-1by1">
+						      <img src="{% static 'shoes.png' %}">
+						    </div>
+						      <b>Chaussures</b>
+						      <p>4200 DZD</p>
+						    </div>
+						</div>
+					</a>
+					<a>
+						<div class="cards has-text-left">
+						    <div class="content">
+						    <div class="image is-1by1">
+						      <img src="{% static 'shoes.png' %}">
+						    </div>
+						      <b>Chaussures</b>
+						      <p>4200 DZD</p>
+						    </div>
+						</div>
+					</a>
+					<a>
+						<div class="cards has-text-left">
+						    <div class="content">
+						    <div class="image is-1by1">
+						      <img src="{% static 'shoes.png' %}">
+						    </div>
+						      <b>Chaussures</b>
+						      <p>4200 DZD</p>
+						    </div>
+						</div>
+					</a>
+					<a>
+						<div class="cards has-text-left">
+						    <div class="content">
+						    <div class="image is-1by1">
+						      <img src="{% static 'shoes.png' %}">
+						    </div>
+						      <b>Chaussures</b>
+						      <p>4200 DZD</p>
+						    </div>
+						</div>
+					</a>
+					<a>
+						<div class="cards has-text-left">
+						    <div class="content">
+						    <div class="image is-1by1">
+						      <img src="{% static 'shoes.png' %}">
+						    </div>
+						      <b>Chaussures</b>
+						      <p>4200 DZD</p>
+						    </div>
+						</div>
+					</a>
+					<a>
+						<div class="cards has-text-left">
+						    <div class="content">
+						    <div class="image is-1by1">
+						      <img src="{% static 'shoes.png' %}">
+						    </div>
+						      <b>Chaussures</b>
+						      <p>4200 DZD</p>
+						    </div>
+						</div>
+					</a>
+
+		  		</div>
+	  		</div>
+		</div>
+		<div class="mt-6" id="produitsdivers">
+			<strong class="mx-4">Produits divers</strong>
+			<div class="mt-4 px-6">
+				<!--
+				<a>
+					<div class="cards has-text-centered">
+					  <div class="cards-content">
+					    <div class="content">
+					      <img src="{% static 'af1.jpg' %}"><br>
+					      <b>Air Force 1</b>
+					      <p>7200 DZD</p>
+					    </div>
+					  </div>
+					</div>
+				</a>
+				-->
+				<a>
+					<div class="cards has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+					      <img src="{% static 'hoodie.jpg' %}">
+					    </div>
+					      <b>Hoodie gris</b>
+					      <p>2800 DZD</p>
+					    </div>
+					</div>
+				</a>
+				<a>
+					<div class="cards has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+					      <img src="{% static 'shoes.png' %}">
+					    </div>
+					      <b>Shoes</b>
+					      <p>4300 DZD</p>
+					    </div>
+					</div>
+				</a>
+				<a>
+					<div class="cards has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+					      <img src="{% static 'af1.jpg' %}">
+					    </div>
+					      <b>Air Force 1</b>
+					      <p>7500 DZD</p>
+					    </div>
+					</div>
+				</a>
+				<a>
+					<div class="cards has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+					      <img src="{% static 'hoodie.jpg' %}">
+					    </div>
+					      <b>Hoodie gris</b>
+					      <p>2800 DZD</p>
+					    </div>
+					</div>
+				</a>
+				<a>
+					<div class="cards has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+					      <img src="{% static 'shoes.png' %}">
+					    </div>
+					      <b>Shoes</b>
+					      <p>4300 DZD</p>
+					    </div>
+					</div>
+				</a>
+				<a>
+					<div class="cards has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+					      <img src="{% static 'af1.jpg' %}">
+					    </div>
+					      <b>Air Force 1</b>
+					      <p>7500 DZD</p>
+					    </div>
+					</div>
+				</a>
+				<a>
+					<div class="cards has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+					      <img src="{% static 'hoodie.jpg' %}">
+					    </div>
+					      <b>Hoodie gris</b>
+					      <p>2800 DZD</p>
+					    </div>
+					</div>
+				</a>
+				<a>
+					<div class="cards has-text-left">
+					    <div class="content">
+					    <div class="image is-4by5">
+					      <img src="{% static 'shoes.png' %}">
+					    </div>
+					      <b>Shoes</b>
+					      <p>4300 DZD</p>
+					    </div>
+					</div>
+				</a>
+			</div>
+		</div>
+	</div>
+
+  <script type="text/javascript">
+  	(function($) {
+
+	$("#scrollcontent").on('scroll', function() {
+    	$val = $(this).scrollLeft();
+
+    	if($(this).scrollLeft() + $(this).innerWidth()>=$(this)[0].scrollWidth){
+          $("#nav-right").hide();
+        } else {
+    		$("#nav-right").show();
+    	}
+
+    	if($val == 0){
+    		$("#nav-left").hide();
+    	} else {
+    		$("#nav-left").show();
+    	}
+  	});
+	$("#nav-right").on("click", function(){
+		$("#scrollcontent").animate( { scrollLeft: '+=240' }, 400);
+		
+	});
+	$("#nav-left").on("click", function(){
+		$("#scrollcontent").animate( { scrollLeft: '-=240' }, 400);
+	});
+
+	
+
+})(jQuery);
+  </script>
+  <script type="text/javascript">
+  	(function($) {
+
+	$("#scrollcontent2").on('scroll', function() {
+    	$val = $(this).scrollLeft();
+
+    	if($(this).scrollLeft() + $(this).innerWidth()>=$(this)[0].scrollWidth){
+          $("#nav2-right").hide();
+        } else {
+    		$("#nav2-right").show();
+    	}
+
+    	if($val == 0){
+    		$("#nav2-left").hide();
+    	} else {
+    		$("#nav2-left").show();
+    	}
+  	});
+	$("#nav2-right").on("click", function(){
+		$("#scrollcontent2").animate( { scrollLeft: '+=500' }, 500);
+		
+	});
+	$("#nav2-left").on("click", function(){
+		$("#scrollcontent2").animate( { scrollLeft: '-=500' }, 500);
+	});
+
+	
+
+})(jQuery);
+  </script>
+{% endblock %}

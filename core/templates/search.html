@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}{{query}} | Leswaq{% endblock %}
+
+{% block content %}
+
+<style type="text/css">
+	.card{
+		width: 20%;display: inline-block;margin-left: 4%;margin-bottom: 15px;border-radius: 0;padding: 0;background: none;box-shadow: none
+	}
+	.card:nth-child(4n+1){margin-left: 3%}
+	.card:nth-child(4n){margin-left: 4%;margin-right: 3%}
+	.inline{display: inline-block;margin-right: 2rem;}
+</style>
+{% if results %}
+	<div class="container my-6 py-4" id="allcontent">
+		{% if account_type in 'secure, online_seller , entreprise' %}
+			<span onclick="document.getElementById('filtres').style.display='none'" style="cursor:pointer"><i class="fas fa-ellipsis-v mr-2"></i><b>Filtres</b></span>
+			<div id="filtres">
+				<form method="post">{% csrf_token %}
+				<div class="mt-2 mb-6" style="display: flex;align-items: center;">
+
+					<div class="inline">
+						<label for='sexe'>Sexe:</label><br>
+							<div class="select">
+							  <select id="sexe" name="sexe">
+							  		<option selected value="both">Les deux</option>
+							  		<option value="h">Hommes</option>
+							  		<option value="f">Femmes</option>
+							  </select>
+							</div>
+					</div>
+
+					<div class="inline">
+						<label>Choix d'age:</label><br>
+						<div>
+						  <input type="range" id="min" name="age_min"
+						         min="7" max="50" step="1" value="7" oninput="changeslider('min')" onchange="minmaxhandler('min')">
+						  <label for="min">Minimum :<span id="minlabel">7</span></label>
+						</div>
+						<div>
+						  <input type="range" id="max" name="age_max"
+						         min="20" max="100" step="1" value="99" oninput="changeslider('max')" onchange="minmaxhandler('max')">
+						  <label for="max">Maximum :<span id="maxlabel">99</span></label>
+						</div>
+					</div>
+
+					<div class="inline">
+						<label>Wilaya</label><br>
+	    				<div class="select">
+							<select name="wilaya" required id="id_wilaya">
+								<option disabled selected>N'importe laquelle</option>
+								{% for i in wilayas %}
+								<option value="{{i}}">{{i}}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div><div class="inline">
+						<label></label><br>
+					<button class="button is-info" name="filter">Filtrer</button></div>
+					</form>
+				</div>
+			</div>
+		{% endif %}
+		{% if not filter %}
+			{% if results %}
+				{% if results.count == 1 %}
+					<h1 class="title has-text-black is-size-4">{{results.count}} resultat a été trouvé pour : "{{query}}"</h1>
+				{% else %}
+					<h1 class="title has-text-black is-size-4">{{results.count}} resultats ont été trouvés pour : "{{query}}"</h1>
+				{% endif %}
+			{% else %}
+			<h1 class="title has-text-black is-size-4">Aucun resultat n'a été trouvé pour : "{{query}}"</h1>
+			{% endif %}
+		{% else %}
+			{% if cat == 'c' %}
+				{% if quer == 'achat' or quer == 'urgences' %}
+					<h1 class="title has-text-black is-size-4">Annonces d'{{quer}}</h1>
+				{% else %}
+					<h1 class="title has-text-black is-size-4">Annonces de {{quer}}</h1>
+				{% endif %}
+			{% elif cat == 's' %}
+				{% if quer|slice:1 in 'A,O,U,I,E' %}
+					<h1 class="title has-text-black is-size-4">Annonces d'{{quer}}</h1>
+				{% else %}
+					<h1 class="title has-text-black is-size-4">Annonces de {{quer}}</h1>
+				{% endif %}
+			{% elif cat == 'f' %}
+				{% if quer|slice:1 in 'A,O,U,I,E' %}
+					<h1 class="title has-text-black is-size-4">Annonces de la wilaya d'{{quer}}</h1>
+				{% else %}
+					<h1 class="title has-text-black is-size-4">Annonces de la wilaya de {{quer}}</h1>
+				{% endif %}
+			{% endif %}
+		{% endif %}
+		<div class="mt-4">
+			<!--
+			{% for i in results %}
+				{% if i.typeannonce != 'covoiturage' %}
+					<a href="{% url 'core:post' slug=i.slug %}">
+						<div class="card has-text-left">
+						    <div class="content">
+						    <div class="image is-4by5">
+								<img src="{{i.images.all.0.image.url}}">
+						    </div>
+								<b>{{i.title}}</b>
+								<p>{{i.prix}} DZD</p>
+						    </div>
+						</div>
+					</a>
+				{% else %}
+					<a href="{% url 'core:post' slug=i.slug %}">
+						<div class="card has-text-left">
+						    <div class="content">
+						    <div class="image is-4by5">
+								<img src="{% static 'covoiturage.jpg' %}">
+						    </div>
+								<b>{{i.title}}</b>
+								<p>{{i.prix}} DZD</p>
+						    </div>
+						</div>
+					</a>
+				{% endif %}
+			{% endfor %}
+-->
+			{% if request.user.is_authenticated %}
+				{% for i in results %}
+					{% if age >= i.age_min and age <= i.age_max %}
+						{% if request.user.sexe == i.sexe or i.sexe == 'both' %}
+							{% if i.wilaya == '' or not i.wilaya or i.wilaya == request.user.wilaya%}
+								{% if i.typeannonce != 'covoiturage' %}
+									<a href="{% url 'core:post' slug=i.slug %}">
+										<div class="card has-text-left">
+										    <div class="content">
+										    <div class="image is-4by5">
+												<img src="{{i.images.all.0.image.url}}">
+										    </div>
+												<b>{{i.title}}</b>
+												<p>{{i.prix}} DZD</p>
+										    </div>
+										</div>
+									</a>
+								{% else %}
+									<a href="{% url 'core:post' slug=i.slug %}">
+										<div class="card has-text-left">
+										    <div class="content">
+										    <div class="image is-4by5">
+												<img src="{% static 'covoiturage.jpg' %}">
+										    </div>
+												<b>{{i.title}}</b>
+												<p>{{i.prix}} DZD</p>
+										    </div>
+										</div>
+									</a>
+								{% endif %}
+							{% endif %}
+						{% endif %}
+					{% endif %}
+				{% endfor %}
+			{% else %}
+				{% for i in results %}
+					{% if i.age_min == 7 and i.age_max == 99 and i.sexe == 'both' %}
+						{% if i.wilaya == '' or not i.wilaya %}
+							{% if i.typeannonce != 'covoiturage' %}
+								<a href="{% url 'core:post' slug=i.slug %}">
+									<div class="card has-text-left">
+									    <div class="content">
+									    <div class="image is-4by5">
+											<img src="{{i.images.all.0.image.url}}">
+									    </div>
+											<b>{{i.title}}</b>
+											<p>{{i.prix}} DZD</p>
+									    </div>
+									</div>
+								</a>
+							{% else %}
+								<a href="{% url 'core:post' slug=i.slug %}">
+									<div class="card has-text-left">
+									    <div class="content">
+									    <div class="image is-4by5">
+											<img src="{% static 'covoiturage.jpg' %}">
+									    </div>
+											<b>{{i.title}}</b>
+											<p>{{i.prix}} DZD</p>
+									    </div>
+									</div>
+								</a>
+							{% endif %}
+						{% endif %}
+					{% endif %}
+				{% endfor %}
+			{% endif %}
+		</div>
+	</div>
+{% else %}
+<div class="my-6 px-4 container">
+		{% if account_type in 'secure, online_seller , entreprise' %}
+			<span onclick="document.getElementById('filtres').style.display='none'" style="cursor:pointer"><i class="fas fa-ellipsis-v mr-2"></i><b>Filtres</b></span>
+			<div id="filtres">
+				<form method="post">{% csrf_token %}
+				<div class="mt-2 mb-6" style="display: flex;align-items: center;">
+
+					<div class="inline">
+						<label for='sexe'>Sexe:</label><br>
+							<div class="select">
+							  <select id="sexe" name="sexe">
+							  		<option selected value="both">Les deux</option>
+							  		<option value="h">Hommes</option>
+							  		<option value="f">Femmes</option>
+							  </select>
+							</div>
+					</div>
+
+					<div class="inline">
+						<label>Choix d'age:</label><br>
+						<div>
+						  <input type="range" id="min" name="age_min"
+						         min="7" max="50" step="1" value="7" oninput="changeslider('min')" onchange="minmaxhandler('min')">
+						  <label for="min">Minimum :<span id="minlabel">7</span></label>
+						</div>
+						<div>
+						  <input type="range" id="max" name="age_max"
+						         min="20" max="100" step="1" value="99" oninput="changeslider('max')" onchange="minmaxhandler('max')">
+						  <label for="max">Maximum :<span id="maxlabel">99</span></label>
+						</div>
+					</div>
+
+					<div class="inline">
+						<label>Wilaya</label><br>
+	    				<div class="select">
+							<select name="wilaya" required id="id_wilaya">
+								<option disabled selected>N'importe laquelle</option>
+								{% for i in wilayas %}
+								<option value="{{i}}">{{i}}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div><div class="inline">
+						<label></label><br>
+					<button class="button is-info" name="filter">Filtrer</button></div>
+					</form>
+				</div>
+			</div>
+		{% endif %}</div>
+<section class="hero is-medium">
+  <div class="hero-body has-text-centered">
+    <p class="title">
+		{% if not filter %}
+			{% if results %}
+				{% if results.count == 1 %}
+					{{results.count}} resultat a été trouvé pour : "{{query}}"
+				{% else %}
+					{{results.count}} resultats ont été trouvés pour : "{{query}}"
+				{% endif %}
+			{% else %}
+				Aucun resultat n'a été trouvé pour : "{{query}}"
+			{% endif %}
+		{% else %}
+			{% if cat == 'c' %}
+				{% if quer == 'achat' or quer == 'urgences' %}
+					Annonces d'{{quer}}
+				{% else %}
+					Annonces de {{quer}}
+				{% endif %}
+			{% elif cat == 's' %}
+				{% if quer|slice:1 in 'A,O,U,I,E' %}
+					Annonces d'{{quer}}
+				{% else %}
+					Annonces de {{quer}}
+				{% endif %}
+			{% elif cat == 'f' %}
+				{% if quer|slice:1 in 'A,O,U,I,E' %}
+					Annonces de la wilaya d'{{quer}}
+				{% else %}
+					Annonces de la wilaya de {{quer}}
+				{% endif %}
+			{% endif %}
+		{% endif %}
+    </p>
+    <b>
+      Aucune annonce n'est disponible pour votre recherche
+    </b>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

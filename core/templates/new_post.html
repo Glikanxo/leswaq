@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Nouvelle annonce{% endblock %}
+
+{% block content %}
+<style type="text/css">
+	#maincont{
+		width: 50%;
+	}
+	@media only screen and (max-width: 1024px){
+		#maincont{
+			width: 90%;
+		}
+	}
+</style>
+	<div class="container my-6">
+		<div style="margin:0 auto" class="p-3" id="maincont">
+			<strong class="has-text-weight-semibold is-size-4">Déposer une annonce</strong><br>
+			<form method="post" enctype="multipart/form-data">
+				{% csrf_token %}
+				<input type="hidden" name="imgnum" value="7" id="picnum">
+				<div class="mt-2">
+					<label for='title'>Titre</label>
+						<input type="text" name="title" id="title" class="input" required>
+				</div>
+				<div class="mt-2">
+					<label for="type">Type de l'annonce</label><br>
+						<div class="select">
+						  <select id="type" name="type" onchange="imageremover(this)">
+								<option value="vente">Vente</option>
+								<option value="achat">Achat</option>
+								{% if not urgence %}
+									<option value="urgence">Urgence</option>
+								{% endif %}
+								{% if account_type in 'secure , online_seller , entreprise'  %}
+									<option value="covoiturage">Co-voiturage</option>
+								{% endif %}
+						  </select>
+						</div>
+				</div>
+				<div class="mt-2">
+					<label for='desc' class="mt-6">Description</label>
+						<textarea name="description" id="desc" class="textarea" rows="3" style="resize: none" required></textarea>
+				</div>
+				<div class="mt-2">
+					<label for='prix' class="mt-6">Prix</label><br>
+						<input type="number" min="0" name="price" id="price" class="input" style="width:30%" required>
+				</div>
+				<div class="mt-2" id="imginps">
+					<label>Images (Veuillez ajouter 7 photos différentes au minimum)</label>
+					<input type="file" class="input" name="img1" accept="image/*" required onchange="Check(this)">
+					<input type="file" class="input" name="img2" accept="image/*" required onchange="Check(this)">
+					<input type="file" class="input" name="img3" accept="image/*" required onchange="Check(this)">
+					<input type="file" class="input" name="img4" accept="image/*" required onchange="Check(this)">
+					<input type="file" class="input" name="img5" accept="image/*" required onchange="Check(this)">
+					<input type="file" class="input" name="img6" accept="image/*" required onchange="Check(this)">
+					<input type="file" class="input" name="img7" accept="image/*" required onchange="Check(this)">
+				</div><br>
+				<a class="button is-radiusless" onclick="Addpic()" id='imginpbtn'>Ajouter une photo</a>
+				<div class="mt-2">
+					<label for='categorie'>Categorie</label><br>
+						<div class="select">
+						  <select id="categorie" name="categorie" onchange="catchange()">
+						  		<option disabled selected>Categories</option>
+								<option value="Téléphones">Téléphones</option>
+								<option value="Véhicules">Véhicules</option>
+								<option value="Immobilier">Immobilier</option>
+								<option value="Electronique & Electroménager">Electronique & Electroménager</option>
+								<option value="Emploi">Emploi</option>
+								<option value="Informatique">Informatique</option>
+								<option value="Mode & Beauté">Mode & Beauté</option>
+								<option value="Maison & Fournitures">Maison & Fournitures</option>
+								<option value="Loisirs & Divertissements">Loisirs & Divertissements</option>
+								<option value="Matériaux & Equipement">Matériaux & Equipement</option>
+								<option value="Voyages">Voyages</option>
+								<option value="Services">Services</option>
+								<option value="Divers">Divers</option>
+						  </select>
+						</div>
+				</div>
+				<div class="mt-2">
+					<label for='souscategorie'>Sous-categorie</label><br>
+						<div class="select">
+						  <select id="souscategorie" name="souscategorie">
+						  		<option disabled selected>Sous-categories</option>
+						  </select>
+						</div>
+				</div>
+				<div class="mt-2">
+					<label for='livraison'>Livraison disponible</label>
+						<input type="checkbox" id="livraison" name="livraison"><br>
+					<label for='deplacement'>Déplacement pour personnes handicapées</label>
+						<input type="checkbox" id="deplacement" name="deplacement"><br>
+					<label for='echange'>Accepte l'échange</label>
+						<input type="checkbox" id="echange" name="echange">
+				</div>
+				{% if account_type in 'secure , online_seller , special_needs' %}
+				<div class="mt-2">
+					<label for='sexe'>Sexe:</label><br>
+						<div class="select">
+						  <select id="sexe" name="sexe">
+						  		<option selected value="both">Les deux</option>
+						  		<option value="m">Hommes</option>
+						  		<option value="f">Femmes</option>
+						  </select>
+						</div>
+				</div>
+				<div class="mt-2">
+					<label>Choix d'age:</label><br>
+					<div>
+					  <input type="range" id="min" name="age_min"
+					         min="7" max="50" step="1" value="7" oninput="changeslider('min')" onchange="minmaxhandler('min')">
+					  <label for="min">Minimum :<span id="minlabel">7</span></label>
+					</div>
+					<div>
+					  <input type="range" id="max" name="age_max"
+					         min="20" max="100" step="1" value="99" oninput="changeslider('max')" onchange="minmaxhandler('max')">
+					  <label for="max">Maximum :<span id="maxlabel">99</span></label>
+					</div>
+				</div>
+				{% if account_type == 'online_seller' %}
+					<label>Wilaya</label><br>
+    				<div class="select">
+						<select name="wilaya" required id="id_wilaya">
+							<option disabled selected>N'importe laquelle</option>
+							{% for i in wilayas %}
+							<option value="{{i}}">{{i}}</option>
+							{% endfor %}
+						</select>
+					</div><br>
+					<label>Publication de vendeur en ligne ?</label>
+					<input type="checkbox" name="online_seller_post">
+				{% endif %}
+				{% endif %}
+				<div class="has-text-right">
+					<button class="button is-radiusless px-4 is-dark" type="submit" name="new-post"><b class="">Envoyer</b></button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<script type="text/javascript">
+		function changeslider(id){
+			var slider = document.getElementById(id);
+			var label = document.getElementById(id + 'label');
+			label.innerHTML=slider.value;
+		}
+		function minmaxhandler(id){
+			var slider = document.getElementById(id);
+			if (id === 'min'){
+				document.getElementById('max').min = slider.value;
+				if (document.getElementById('max').min === document.getElementById('max').value){
+					document.getElementById('maxlabel').innerHTML=document.getElementById('max').value;
+				}
+			}else if (id === 'max'){
+				document.getElementById('min').max = slider.value;
+				if (document.getElementById('min').max === document.getElementById('min').value){
+					document.getElementById('minlabel').innerHTML=document.getElementById('min').value;
+				}
+			}
+		}
+		function Addpic(){
+			document.getElementById("picnum").value = parseInt(document.getElementById("picnum").value)+1;
+			var id = 'img' + document.getElementById("picnum").value;
+			document.getElementById('imginps').innerHTML += '<input type="file" class="input" name="'+id+'" accept="image/*" onchange="Check(this)">';
+		}
+		var images = [];
+		function Check(ths){
+			if (images.includes(ths.value)){
+				ths.value = '';
+			}else{
+				images.push(ths.value);
+			}
+		}
+		function imageremover(inp){
+			var picnum = parseInt(document.getElementById("picnum").value);
+			if (inp.value == 'covoiturage'){
+				document.getElementById('imginps').style.display='none';
+				document.getElementById('imginpbtn').style.display='none';
+				for (var i = 1;i<= picnum;i ++){
+					var nm = 'img' + i;
+					document.querySelector('input[name=' + CSS.escape(nm) + ']').required=false;
+				}
+			}else{
+				document.getElementById('imginps').style.display='block';
+				document.getElementById('imginpbtn').style.display='block';
+				for (var i = 1;i<= picnum;i ++){
+					var nm = 'img' + i;
+					document.querySelector('input[name=' + CSS.escape(nm) + ']').required=true;
+				}
+			}
+		}
+		function catchange (){
+			var content ="<option disabled selected>Sous-categories</option>";
+			var beauty = ['Vêtements','Accessoire de mode','Cosmétiques et beauté'];
+			var sub = {
+				"Téléphones" : ['Mélange','Smartphones','Téléphones portable','Tablettes','Téléphone Fixe',
+    							'Accessoires de téléphone','Puces et Abonnements','Services de réparation'],
+				"Immobilier" :['Appartements','Carcasse','Hangar','Bungalow','Usine','Immeuble','Duplex',
+  								'Local','Villa','Niveau de villa','Terrain'],
+  				'Véhicules' :['Mélange','Automobile','Fourgon','Semi a remorques','Camions','Remorques','Bus','Minibus','Motos',
+  							'Bateaux','barques','Engin','Tracteurs','Pièces détachées','Accessoires auto','Services de réparations et diagnostics'],
+				'Electronique & Electroménager' :['Mélange','Électroménagers','Appareils photo et accessoires',
+							'Caméras et accessoires','Lecteurs vidéo et audio','Sécurité et surveillance','GPS et navigations','Démodulateurs et décodeurs','Téléviseurs','Chaines (stéréo)','Abonnement au serveur','Accessoires électroniques','Pièces de rechange','Services de réparations'],
+				'Emploi' :['Commercial et marketing','commerce et vente','Éducations et formations',
+							'tourisme et gastronomie','Industrie et production','nettoyage et hygiène','Beauté et esthétique','bureautique et secrétariat','Couture et confection','informatique et internet','Compatibilité et audit','mécanique auto','Graphisme et communication','agents polyvalents','Transport et chauffeurs','artisanat','Électroniques et techniques','administration et management'],
+				'Informatique' :['Mélange','Ordinateurs portables','Ordinateurs bureautiques','Piéces de rechange',
+							'Accessoires informatiques','Impriment et scanners','Écrans et data show','Réseau et connexion','Applications et logiciels','Stockage externe','Onduleurs et stabilisateurs'],
+  				'Vêtements' :['Mélange','Chaussures homme','prêt à porter homme','Prêt à porter femme','chaussures femme',
+  							'Mariages et fêtes','prêt à porter fille','Chaussures garçon','tenues professionnelles','Chaussures fille' ,'maternité','Prêt à porter bébé','prêt à porter garçon','Chaussures bébé'],
+				'Accessoire de mode' :['Mélange','Montres','lunettes','Sacs','bijoux','Ceintures'],
+  				'Cosmétiques et beauté' :['Mélange','Soins','maquillage','Parfums et déodorants','produits paramédicaux','Rasage et épilations','instruments et outils','Accessoires de beauté','hygiène','Produits pour bébé'],
+
+
+				'Maison & Fournitures' :['Mélange','Meubles de maison','Meubles de bureau','Décoration et aménagement',
+							'Vaisselles','Literie et linge et rideaux','Jardinages','Tapis et moquettes','Services décoration maisons','Produits pour bébé','fournitures et articles scolaires'],
+
+
+				'Loisirs & Divertissements' :['Mélange','Articles de sport','livres et magazines','Consoles de jeux','jeux vidéo'
+							,'accessoires jeux vidéo','Jouets','chasse et pèche','Instrument de musique','média','Body building','antiquités et collections'],
+
+
+				'Matériaux & Equipement' :['Mélange','Matériels professionnels','Outillage professionnel','produits hygiène',
+							'Matériaux de construction','matières premières'],
+
+
+				'Voyages' :['Réservations et visas','voyage organisé','Séjour','croisière','Hadj et Omra',
+							'études et formations','Immigration','emploi à l’étranger'],
+
+
+				'Services' :['Mélange','Construction et travaux','écoles et formations','Industrie et fabrication',
+							'transport et déménagement','Décoration et aménagement','médecine et santé','Traiteurs et gâteaux','publicité et communication','Nettoyage et jardinage','froid et climatisation','Location de véhicules','projets et études','Réparation auto et diagnostic','sécurité et alarme','Menuiserie et meubles','bureautique et internet','Hôtelleries et restaurations et salle','impression et édition','Esthétique et beauté','images et son','Comptabilité et économie','couture et confection','Maintenance informatique','événements et divertissement','Paraboles et démos','réparation électroniques','Réparation électroménagers','services à l’étranger','Flashage et réparation téléphonique','installation des jeux et flashage','Juridique'],
+				'Divers' :[]
+			};
+			if (document.getElementById('categorie').value != 'Divers'){
+				if (document.getElementById('categorie').value != 'Mode & Beauté'){
+					for (i=0;i<sub[document.getElementById('categorie').value].length;i++){
+						content += '<option value="'+sub[document.getElementById('categorie').value][i]+'">'+sub[document.getElementById('categorie').value][i]+'</option>'
+					}
+				}else{
+					for (j=0;j<beauty.length;j++){
+						content += '<option disabled>'+beauty[j]+'</option>';
+						for (i=0;i<sub[beauty[j]].length;i++){
+							content += '<option value="'+sub[beauty[j]][i]+'">'+sub[beauty[j]][i]+'</option>';
+						}
+					}
+				}
+				document.getElementById('souscategorie').innerHTML = content;
+			}else{
+				document.getElementById('souscategorie').innerHTML = "<option value'Divers'>Divers</option>";
+			}
+		};
+		/*
+		imgInp1.onchange = evt => {
+		  const [file] = imgInp1.files
+		  if (file) {
+		    img1.src = URL.createObjectURL(file);
+		    img1.style.display='block';
+		  }
+		}
+		*/
+	</script>
+{% endblock %}

@@ -1,0 +1,475 @@
+{% load static %}
+<!DOCTYPE html>
+<html style="height: 100%;">
+<head>
+	<title>{% block title %}{% endblock %}</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="{% static 'main.css' %}">
+	<meta name="description" content="">
+	<link rel="stylesheet" href="https://bulma.io/vendor/fontawesome-free-5.15.2-web/css/all.min.css">
+	<script src="{% static 'jquery.min.js' %}"></script>
+	<style type="text/css">
+		:root {
+		  --background-color: #fff;
+		  --text-color: #000;
+		}
+		html {
+		  background-color: var(--background-color);
+		  color: var(--text-color);
+		}
+		p, strong, b{
+			color:var(--pcolor);
+		}
+		label, .title,h1{
+			color: var(--text-color)!important;
+		}
+		[data-theme="dark"] {
+		  --background-color: #3F3F3F;
+		  --text-color: #fff;
+		  --pcolor:white;
+		}
+		[data-theme="light"] {
+		  --background-color: whitesmoke;
+		  --text-color: #000;
+		}
+		.checkbox {
+			opacity: 0;
+			position: absolute;
+		}
+
+		.label {
+			background-color: #111;
+			border-radius: 50px;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 2.5px;
+			position: relative;
+			height: 13px;
+			width: 25px;
+			font-size: 0.5rem;
+			transform: scale(1.5);
+		}
+
+		.label .ball {
+			background-color: #fff;
+			border-radius: 50%;
+			position: absolute;
+			top: 1px;
+			left: 1px;
+			height: 11px;
+			width: 11px;
+			transform: translateX(0px);
+			transition: transform 0.2s linear;
+		}
+
+		.checkbox:checked + .label .ball {
+			transform: translateX(12px);
+		}
+
+
+		.fa-moon {
+			color: #f1c40f;
+		}
+
+		.fa-sun {
+			color: #f39c12;
+		}
+		.footer{
+			position: fixed;bottom: 0;
+		}
+		@media only screen and (max-width: 1024px){
+			.inact{
+				display: none
+			}
+			
+			.navbar-link b, .navbar-item b{
+				color: black;
+			}
+			#logotext{
+				color: white;
+			}
+			#catdrop{
+				max-height: 50vh;overflow-y: scroll
+			}
+		}
+		@media only screen and (min-width: 1024px){
+		  .dpr:hover + .dropdown-menu {
+		    display: block;
+		  }
+		  .nested .dropdown-menu:hover {
+		    display: block;
+		  }
+		  .nested .dropdown-menu {
+		    top: -15px;
+		    margin-left: 100%;
+		    max-height: 170px;
+		    overflow-y: scroll;
+		  }
+		}
+	</style>
+	<script type="text/javascript">
+	  // Wait for document to load
+	  document.addEventListener("DOMContentLoaded", function(event) {
+	  	if ((localStorage.getItem("theme") == "light") || (localStorage.getItem("theme") == null)){
+	    	document.documentElement.setAttribute("data-theme", "light");
+	    }else if (localStorage.getItem("theme") == "dark"){
+	    	document.documentElement.setAttribute("data-theme", "dark");
+	    	document.getElementById('chk1').checked = true;
+	    	document.getElementById('chk2').checked = true;
+	    }
+	  });
+	</script>
+</head>
+<body>
+	<nav class="navbar is-primary is-fixed-top" role="navigation" aria-label="main navigation" style="background: #0703f4" id="navbar">
+	  <div class="navbar-brand">
+	    <a class="navbar-item" href="{% url 'core:index' %}">
+            <img loading="lazy" src="{% static 'logo4.png' %}" alt="logo" class="is-hidden-touch">
+            <img loading="lazy" src="{% static 'logomb.png' %}" alt="logo" class="is-hidden-desktop">
+	    </a>
+	    <div class="navbar-item is-hidden-desktop" style="margin: 0 auto">
+	        <input type="text" class="input is-small is-rounded" placeholder="Je cherche ..." id="searchfieldm" value="{{query}}">
+	        <span class="icon ml-2" style="cursor: pointer;" onclick="Searchm()" id="searchbtnm">
+	        	<i class="fas fa-search"></i>
+	        </span>
+	      </div>
+
+	    <a role="button" class="navbar-burger ml-0" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample" id="navbar-burger">
+	      <span aria-hidden="true"></span>
+	      <span aria-hidden="true"></span>
+	      <span aria-hidden="true"></span>
+	    </a>
+	  </div>
+
+	  <div id="navbarBasicExample" class="navbar-menu">
+	    <div class="navbar-start">
+	    	<div class="navbar-item is-hidden-desktop" style="display: flex;justify-content: space-between;">
+	    	{% if not user.is_authenticated %}
+				<a href="{% url 'account:login' %}">
+	      	<strong>Se Connecter</strong>
+	      </a>
+	      <a  href="{% url 'account:register' %}">
+	      	<strong>S'inscrire</strong>
+	      </a>
+	      {% endif %}
+	      <div>
+						<input type="checkbox" class="checkbox" id='chk1' />
+						<label class="label" for="chk1" id="theme-switcher" onclick="themeswitch();">
+							<i class="fas fa-moon"></i>
+							<i class="fas fa-sun"></i>
+							<div class="ball"></div>
+						</label>
+					</div>
+	    </div>
+	      	<div class="navbar-item has-dropdown is-hoverable">
+		        <a class="navbar-link" onclick="(window.innerWidth<=1024)?document.getElementById('wilayasdrop').classList.toggle('inact'):console.log('screen too wide');">
+		          <b>Wilayas</b>
+		        </a>
+
+		        <div class="navbar-dropdown inact" style="max-height: 50vh;overflow-y: scroll" id="wilayasdrop">
+			    {% for i in wilayas %}
+					<a class="navbar-item" href="{% url 'core:filter' cat='f' query=i %}">
+						{{i}}
+					</a>
+				{% endfor %}
+		        </div>
+	      	</div>
+			<div class="navbar-item has-dropdown is-hoverable">
+				<a class="navbar-link" onclick="(window.innerWidth<=1024)?document.getElementById('catdrop').classList.toggle('inact'):console.log('screen too wide');">
+					<b>Catégories</b>
+				</a>
+
+				<div class="navbar-dropdown inact" id="catdrop">
+			    {% for key,value in categories.items %}
+					<div class="nested navbar-item dropdown p-0">
+						<div class="dropdown-trigger dpr" style="width: 100%">
+							<a class="navbar-item" aria-haspopup="true" href="{% url 'core:filter' cat='c' query=key %}" aria-controls="dropdown-menu">
+								<span>{{key}}</span>
+								<span class="icon is-small">
+									<i class="fas fa-angle-right" aria-hidden="true"></i>
+								</span>
+							</a>
+						</div>
+						<div class="dropdown-menu" id="dropdown-menu" role="menu">
+							<div class="dropdown-content">
+								{% for i in value %}
+									<a href="{% url 'core:filter' cat='s' query=i %}" class="dropdown-item">
+										{{i}}
+									</a>
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+				{% endfor %}
+				</div>
+			</div>
+	      <div class="navbar-item is-hidden-touch">
+	        <input type="text" class="input is-small is-rounded" placeholder="Je cherche ..." id="searchfield" value="{{query}}">
+	        <span class="icon ml-2" style="cursor: pointer;" onclick="Search()" id="searchbtn">
+	        	<i class="fas fa-search"></i>
+	        </span>
+	      </div>
+
+	    </div>
+	    <div class="navbar-end">
+
+	    {% if user.is_authenticated %}
+	      <div class="navbar-item has-dropdown is-hoverable">
+		        <a class="navbar-link" onclick="(window.innerWidth<=1024)?document.getElementById('accdrop').classList.toggle('inact'):console.log('screen too wide');">
+		          <b>Mon Compte</b>
+		        </a>
+		        
+		        <div class="navbar-dropdown inact" id="accdrop">
+		          <a class="navbar-item" href="{% url 'account:profil' %}">
+		            Mon Profil
+		          </a>
+		          <a class="navbar-item" style="display: flex;justify-content: space-between;padding-right: 1rem;" href="{% url 'core:notifications' %}">
+		          		<span>Notifications</span><span class="has-text-weight-semibold">{{notif_count}}</span>
+		          </a>
+		          {% if account_type != 'kid' %}
+		          <a class="navbar-item" style="display: flex;justify-content: space-between;padding-right: 1rem;" href="{% url 'chat:index' %}">
+		          		<span>Messages</span><span class="has-text-weight-semibold">{{count}}</span>
+		          </a>
+		          {% endif %}
+		          {% if account_type not in 'aucun , ado , kid , special_needs' %}
+			          <a class="navbar-item" style="display: flex;justify-content: space-between;padding-right: 1rem;" href="{% url 'account:history' %}">
+			          		Historique de transactions
+			          </a>
+		          {% endif %}
+		          {% if saved %}
+		          <a class="navbar-item" href="{% url 'account:saved' %}">
+		            Enregistrés
+		          </a>
+		          {% endif %}
+		          <a href='{% url "account:logout" %}' class="navbar-item">
+		            Déconnexion
+		          </a>
+		          {% if account_type != 'kid' %}
+          		<hr class="navbar-divider">
+		          <a href='{% url "account:upgrade" %}' class="navbar-item">
+		            Mettre à niveau
+		          </a>
+		          {% endif %}
+		          {% if account_type != 'kid' %}
+			          <a href='{% url "account:child-register" %}' class="navbar-item">
+			            Compte enfant
+			          </a>
+		          {% endif %}
+		        </div>
+	      </div>
+		          {% if account_type != 'kid' %}
+		        <a class="navbar-item" href="{% url 'core:new-post' %}">
+		          <b>J'annonce</b>
+		        </a>
+		        {% endif %}
+	    {% else %}
+	      <a class="navbar-item is-hidden-touch" href="{% url 'account:login' %}">
+	      	<strong>Se Connecter</strong>
+	      </a>
+	      <a class="navbar-item is-hidden-touch" href="{% url 'account:register' %}">
+	      	<strong>S'inscrire</strong>
+	      </a>
+	    {% endif %}
+
+	      <div class="navbar-item mr-2 is-hidden-touch">
+	      	<div>
+						<input type="checkbox" class="checkbox" id='chk2' />
+						<label class="label" for="chk2" id="theme-switcher1" onclick="themeswitch();">
+							<i class="fas fa-moon"></i>
+							<i class="fas fa-sun"></i>
+							<div class="ball"></div>
+						</label>
+					</div>
+	      </div>
+	    </div>
+	  </div>
+	</nav>
+	<div class="py-5" id="spacer"></div>
+	<script type="text/javascript">
+
+// Listen for a click on the button 
+function themeswitch () {
+	var currentTheme = localStorage.getItem("theme");
+  console.log(document.documentElement.getAttribute("data-theme"));
+  if (currentTheme != null){
+  	if (currentTheme == "light"){
+
+	    document.documentElement.setAttribute("data-theme", "dark");
+  		localStorage.setItem("theme", 'dark');
+  	}else if (currentTheme == "dark"){
+
+	    document.documentElement.setAttribute("data-theme", "light");
+  		localStorage.setItem("theme", 'light');
+  	}
+  }else{
+	document.documentElement.setAttribute("data-theme", "dark");
+  	localStorage.setItem("theme", 'dark');
+  }
+};
+	</script>
+{% block content %}
+
+{% endblock %}
+
+<footer class="has-background-black pb-2 mt-6" id="footer">
+	<div class="container pt-2 is-hidden-desktop has-text-centered has-text-white">
+
+		<b class="is-size-4"><img loading="lazy" src="{% static 'logo4.png' %}" width="30%"></b><br>
+		<a href="{% url 'core:politique' %}" class="has-text-white"><b>Politique de confidentialité</b></a><br>
+		<a href="" class="has-text-white"><b>Mentions légales</b></a><br>
+		<a href="{% url 'core:conditions' %}" class="has-text-white"><b>Conditions d'utilisation</b></a><br>
+		<b class="is-size-5">Suivez-nous</b>
+		<div class="level is-mobile mt-1">
+			<div class="level-item">
+				<a class="has-text-white"><b>Facebook</b></a>
+			</div>
+			<div class="level-item">
+				<a class="has-text-white"><b>Instagram</b></a>
+			</div>
+		</div>
+		<hr class="navbar-divider mx-6" style="display: block">
+   		&copy;<script>document.write(new Date().getFullYear())</script> Powered by Splif Solutions. Tous droits reservés
+	</div>
+
+	<div class="container pt-5 is-hidden-touch">
+		<div class="columns has-text-white">
+			<div class="column is-one-quarter">
+				<ul class="mt-2">
+					<li>
+						<a  class="has-text-white"><b>Politique de Confidentialité</b></a>
+					</li>
+					<li>
+						<a  class="has-text-white"><b>Mentions légales</b></a>
+					</li>
+					<li>
+						<a  class="has-text-white"><b>Conditions d'utilisation</b></a>
+					</li>
+				</ul>
+			</div>
+			<div class="column is-one-quarter">
+			</div>
+			<div class="column is-one-quarter">
+				<b class="is-size-4"><img loading="lazy" src="{% static 'logo4.png' %}" width="50%"></b><br>
+				{% if request.user.is_authenticated %}
+				<ul class="mt-2">
+					<li>
+						<a onclick="signalerarnaque()" class="has-text-white"><b>Signaler une arnaque</b></a>
+					</li>
+				</ul>
+				{% endif %}
+			</div>
+			<div class="column is-one-quarter">
+				<b class="is-size-5">Suivez-nous</b>
+				<ul class="mt-2">
+					<li>
+						<a  class="has-text-white"><b>Facebook</b></a>
+					</li>
+					<li>
+						<a  class="has-text-white"><b>Instagram</b></a>
+					</li>
+					<li>
+						<a  class="has-text-white"><b>Youtube</b></a>
+					</li>
+				</ul>
+				
+			</div>
+		</div>	
+        <hr class="navbar-divider">
+        	<div class="has-text-centered has-text-white">
+       			&copy;<script>document.write(new Date().getFullYear())</script> Powered by Splif Solutions. Tous droits reservés
+       	</div>
+
+	</div>
+
+				{% if request.user.is_authenticated %}
+    <div class="modal" id="signalerarnaquemodal">
+      <div class="modal-background" onclick="signalerarnaque()"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Signaler une arnaque</p>
+          <button class="delete" aria-label="close" onclick="signalerarnaque()"></button>
+        </header>
+        <div id='modalbody'>
+        <section class="modal-card-body" >
+          <form method="POST" id="signalerar">
+          {% csrf_token %}
+            <label><b class="has-text-dark">Description de l'incident :</b></label><br>
+            <small>Veuillez expliquer tout les details (Qui? Comment? Où?)</small>
+            <textarea class="textarea" style="resize: none" name="content"></textarea>
+        </section>
+        <footer class="modal-card-foot">
+          <button type="submit" class="button is-success" name="signaler">Envoyer</button>
+          </form>
+          <button class="button" onclick="signalerarnaque()">Annuler</button>
+        </footer>
+    	</div>
+      </div>
+    </div>
+				{% endif %}
+
+</footer>
+
+				{% if request.user.is_authenticated %}
+<script type="text/javascript">
+  $(document).on('submit', '#signalerar',function(e){
+    e.preventDefault();
+    $.ajax({
+        type:'POST',
+        url:'{% url "core:signaler-arnaque" %}',
+        data:{
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+            action: 'signaler',
+            content: $('textarea[name=content]').val()
+        },
+        success:function(json){
+          document.getElementById('signalerar').reset();
+          document.getElementById('modalbody').innerHTML='<section class="modal-card-body has-text-centered" ><b class="is-size-4">Votre plainte est envoyée avec succès</b></section><footer class="modal-card-foot" style="justify-content:flex-end;"><button class="button is-success" onclick="signalerarnaque()">Fermer</button></footer>';
+        },
+    })})
+</script>
+				{% endif %}
+
+<script type="text/javascript">
+
+      function signalerarnaque(){
+        document.getElementById('signalerarnaquemodal').classList.toggle('is-active');
+      }
+	document.getElementById('searchfield').addEventListener("keyup", function(event) {
+		if (event.keyCode === 13) {
+			document.getElementById("searchbtn").click();
+		}
+	});
+	document.getElementById('searchfieldm').addEventListener("keyup", function(event) {
+		if (event.keyCode === 13) {
+			document.getElementById("searchbtnm").click();
+		}
+	});
+	function Search() {
+			var query = document.getElementById('searchfield').value;
+			window.location = '/search/' + query;
+		}	
+	function Searchm() {
+			var querym = document.getElementById('searchfieldm').value;
+			window.location = '/search/' + querym;
+		}	
+</script>
+<script type="text/javascript">
+	const burgerIcon = document.querySelector("#navbar-burger");
+	const menu = document.querySelector("#navbarBasicExample");
+	burgerIcon.addEventListener('click', () => {
+		menu.classList.toggle('is-active');
+	});
+</script>
+{% if request.user.is_authenticated %}
+<script src="{% static 'reconnecting-websocket.js' %}"></script>
+<script>
+
+    var chatSocket = new ReconnectingWebSocket(
+        'ws://' + window.location.host +
+        '/ws/activity/');
+</script>
+{% endif %}
+</body>
+</html>

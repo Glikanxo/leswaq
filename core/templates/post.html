@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% load tags %}
+{% load static %}
+
+{% block title %}{{product.title}} | Leswaq{% endblock %}
+
+{% block content %}
+<style type="text/css">
+	.miniature{
+		cursor: pointer;
+	}
+	.ml-6-desktop{
+    	margin-left: 3rem !important;
+	}
+	@media only screen and (max-width: 1024px){
+		.ml-6-desktop{
+			margin-left: 0!important
+		}
+	}
+</style>
+	<div class="container mt-6" id="maincontainer">
+		<div class="columns mx-6 mb-6">
+			<div class="column is-two-fifths"	style="line-height: 0">
+				{% if product.typeannonce != 'covoiturage' %}
+					<div class="image is-1by1"style="margin-bottom: 20px">
+						<img loading="lazy" src="{{ product.images.all.0.image.url }}" id="mainimg">
+					</div>
+					{% for i in product.images.all|paginatebyfive %}
+						<div class="columns is-mobile">
+							{% for j in i %}
+								<div class="column is-one-fifth">
+									<div class="container miniature" onclick="document.getElementById('mainimg').src='{{j.image.url}}'">
+										<div class="image is-1by1" style="border: solid 1px #707070">
+											<img loading="lazy" src="{{j.image.url}}">
+										</div>
+									</div>
+								</div>
+							{% endfor %}
+						</div><br>
+					{% endfor %}
+				{% else %}
+					<div class="image is-1by1"style="margin-bottom: 20px">
+						<img loading="lazy" src="{% static 'covoiturage.jpg' %}" id="mainimg">
+					</div>
+				{% endif %}
+			</div>
+			<div class="column ml-6-desktop">
+				<h1 class="title mt-3">{{product.title}}
+					<div class="dropdown is-right is-pulled-right is-hoverable">
+					  <div class="dropdown">
+						<span class="is-pulled-right icon">
+							<i class="fas fa-ellipsis-v is-size-6"></i>
+						</span>
+					  </div>
+					  <div class="dropdown-menu" id="dropdown-menu6" role="menu">
+					    <div class="dropdown-content">
+					      <div class="dropdown-item p-0">
+				          	{% if request.user == product.creator %}
+				          		{% if not deleted %}
+					          		<a class="navbar-item" onclick="modaldelete()">
+					            		Supprimer la publication
+					          		</a>
+					          		{% if product.vender_en_ligne != True %}
+						          		{% if product.buyer == "" %}
+						          		<a class="navbar-item" onclick="modalbuyer()">
+						            		Indiquer l'acheteur
+						          		</a>
+						          		{% endif %}
+						          	{% endif %}
+				          		{% endif %}
+				          	{% else %}
+						        <a class="navbar-item" onclick="modalbtn()">
+					            	Signaler une Publication
+					          	</a>
+				          	{% endif %}
+					      </div>
+					    </div>
+					  </div>
+					</div>
+				</h1>
+				{% if request.user.is_authenticated %}
+				<a href="{% url 'account:userprofil' user=product.creator.username %}"><strong>{{product.creator.username}}</strong></a><br>{% endif %}
+				<strong>{{product.creator.commune}}, {{product.creator.wilaya}}</strong>
+				<p>{{product.description}}</p><br>
+				{% if product.deplacement %}
+					<b>Déplacement disponible pour personnes handicapées</b><br>
+				{% endif %}
+				{% if product.livraison %}
+					<b>Livraison disponible</b><br>
+				{% endif %}
+				{% if product.echange %}
+					<b>Accépte l'échange</b><br>
+				{% endif %}
+				<div class="mt-4 mb-3">
+					<b class="is-size-5">Prix</b>
+					<p>DZD {{product.prix}}</p>
+				</div>
+					{% csrf_token %}
+				{% if account_type != 'kid' %}
+					{% if request.user.is_authenticated %}
+						{% if request.user != product.creator %}
+							<button class="button is-dark" onclick="demandecontact()" id="demandebtn">Contacter le vendeur</button>
+					{% if saved %}
+						<span id="savebtn">
+							{% if savd %}
+								<button class="button is-dark" onclick="unsave()">
+									<span class="icon has-text-danger" id="heart">
+										<i class="fas fa-heart"></i>
+									</span>
+								</button>
+							{% else %}
+								<button class="button is-dark" onclick="save()">
+									<span class="icon" id="heart">
+										<i class="fas fa-heart"></i>
+									</span>
+								</button>
+							{% endif %}
+						</span>
+					{% endif %}
+						{% endif %}
+					<div class="py-3" id="contact-info">
+					</div>
+					{% endif %}
+				{% else %}
+				<form method="POST">
+					{% csrf_token %}
+					<button class="button is-dark" name="send-parent">Envoyer au parent</button>
+				{% endif %}
+				<b onclick="modalconseil()" style='cursor: pointer;'>Conseils d'achat</b>
+			</div>
+		</div>
+	</div>
+	<div class="modal" id="modal">
+	  <div class="modal-background" onclick="modalbtn()"></div>
+	  <div class="modal-card">
+	    <header class="modal-card-head">
+	      <p class="modal-card-title">Signaler une Publication</p>
+	      <button class="delete" aria-label="close" onclick="modalbtn()"></button>
+	    </header>
+	    <section class="modal-card-body">
+	    	<form method="post" id="signal">
+	    		{% csrf_token %}
+	    	<textarea class="textarea" placeholder="Raison du signal" style="resize: none;" rows="3" id="raison" required></textarea>
+	    </section>
+	    <footer class="modal-card-foot">
+	      <button class="button is-danger" type="submit">Envoyer</button>
+	      </form>
+	      <button class="button" onclick="modalbtn()">Annuler</button>
+	    </footer>
+	  </div>
+	</div>
+	<div class="modal" id="modaldelete">
+	  <div class="modal-background" onclick="modaldelete()"></div>
+	  <div class="modal-card">
+	    <header class="modal-card-head">
+	      <p class="modal-card-title">Etes vous sur de supprimer définitivement ?</p>
+	      <button class="delete" aria-label="close" onclick="modaldelete()"></button>
+	    </header>
+	    <section class="modal-card-body">
+	    	<p class="has-text-dark">Votre publication ne sera pas supprimée immédiatement. Vous devez d'abord ajouter les informations de l'acheteur sinon la publication sera supprimée dans 2 jours.</p>
+	    </section>
+	    <footer class="modal-card-foot">
+	    	<form method="post">
+	    		{% csrf_token %}
+	      		<button class="button is-danger" type="submit" name="deletepost">Supprimer</button>
+	 		</form>
+	      <button class="button" onclick="modaldelete()">Annuler</button>
+	    </footer>
+	  </div>
+	</div>
+	<div class="modal" id="modalconseil">
+	  <div class="modal-background" onclick="modalconseil()"></div>
+	  <div class="modal-card">
+	    <header class="modal-card-head">
+	      <p class="modal-card-title">Conseils d'achat</p>
+	      <button class="delete" aria-label="close" onclick="modalconseil()"></button>
+	    </header>
+	    <section class="modal-card-body">
+	    	<ul style="list-style: initial;">
+	    		{% for i in conseils %}
+	    			<li>{{i.content}}</li>
+	    		{% empty %}
+	    			<b>Y'a pas de conseils actuellement, veuillez soummetre le votre</b>
+	    		{% endfor %}
+	    	</ul>
+	    </section>
+	    <footer class="modal-card-foot">
+	    	{% if request.user.is_authenticated %}
+		      <button class="button is-success" onclick="this.style.display='none';document.getElementById('adviceform').style.display='block'">Soumettre un conseil d'achat</button>
+		      <form id="adviceform" style="display: none;" method="post">
+		      	{% csrf_token %}
+		      	<input type="text" name="content" class="input" placeholder="Votre conseil">
+		      	<button class="button is-success" type="submit" name="adviceform">Soumettre</button>
+		      </form>
+		    {% endif %}
+	    </footer>
+	  </div>
+	</div>
+	{% if product.vender_en_ligne != True %}
+		{% if product.buyer == '' %}
+		<div class="modal" id="modalbuyer">
+		  <div class="modal-background" onclick="modalbuyer()"></div>
+		  <div class="modal-card">
+		    <header class="modal-card-head">
+		      <p class="modal-card-title">Désigner l'acheteur de ce produit</p>
+		      <button class="delete" aria-label="close" onclick="modalbuyer()"></button>
+		    </header>
+		    <section class="modal-card-body">
+		    	<div id="formdesignate">
+		    	<form method="post" id="buyeridentif">
+		    		{% csrf_token %}
+		    		<b class="has-text-danger" style="display: none" id="user_not_found">Utilisateur introuvable</b>
+		    		<p><b class="has-text-dark">Où est ce que s'est passé la vente ?</b></p>
+		    		<label class="has-text-dark">Sur le site:</label>
+		    			<input type="radio" name="place" value="site" checked="True"><br>
+		    		<label class="has-text-dark">Autre part:</label>
+		    			<input type="radio" name="place" value="hors-site"><br>
+
+		    		<label><b class="has-text-dark">Informations de l'acheteur (Nom d'utilisateur exact ou sinon les informations personelles):</b></label>
+		    		<input type="text" name="buyer" class="input" required>
+		    	</div>
+		    	<div id='success-form' class="has-text-centered" style="display: none">
+		    		<i class="far fa-check-circle has-text-success is-size-1"></i>
+		    		<h4 class="subtitle has-text-success">Acheteur définit par succés</h4>
+		    	</div>
+		    </section>
+		    <footer class="modal-card-foot">
+		    	<div id="form-footer">
+		      		<button class="button is-success" type="submit" name="buyeridentif">Confirmer</button>
+		 		</form>
+		      <button class="button" onclick="modalbuyer()">Annuler</button>
+		  		</div>
+		    </footer>
+		  </div>
+		</div>
+		{% endif %}
+	{% endif %}
+	<script type="text/javascript">
+		function closesuccess() {
+			document.getElementById('notif').style.display='none';
+		}
+	</script>
+	<script type="text/javascript">
+		function modalbtn(){
+			document.getElementById('modal').classList.toggle('is-active')
+		}
+		function modaldelete(){
+			document.getElementById('modaldelete').classList.toggle('is-active')
+		}
+		function modalconseil(){
+			document.getElementById('modalconseil').classList.toggle('is-active')
+		}
+		{% if product.vender_en_ligne != True %}
+		{% if product.buyer == '' %}
+		function modalbuyer(){
+			document.getElementById('modalbuyer').classList.toggle('is-active')
+		}
+		{% endif %}
+		{% endif %}
+		function save(){
+			$.ajax({
+	        type:'POST',
+	        url:'{% url "core:post" slug=product.slug %}',
+	        data:{
+	            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+	            action: 'save',
+	        },
+	        success:function(json){
+	        		document.getElementById('savebtn').innerHTML='<button class="button is-dark" onclick="unsave()"><span class="icon has-text-danger" id="heart"><i class="fas fa-heart"></i></span></button>';
+	        	},
+	    	})
+		}
+
+		function demandecontact(){
+			$.ajax({
+	        type:'POST',
+	        url:'{% url "core:post" slug=product.slug %}',
+	        data:{
+	            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+	            action: 'demandecontact',
+	        },
+	        success:function(json){
+	        		document.getElementById('contact-info').innerHTML='<strong>Numéro de téléphone : </strong>' + json.number + "<br><a class='button is-radiusless is-info' href='{% url 'chat:room' room_name=product.creator.username %}'>Contacter par message privé</a>";
+	        		document.getElementById('demandebtn').disabled = true;
+	    	}})
+		}
+		
+		function unsave(){
+			$.ajax({
+	        type:'POST',
+	        url:'{% url "core:post" slug=product.slug %}',
+	        data:{
+	            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+	            action: 'unsave',
+	        },
+	        success:function(json){
+	        		document.getElementById('savebtn').innerHTML='<button class="button is-dark" onclick="save()"><span class="icon" id="heart"><i class="fas fa-heart"></i></span></button>';
+	        	},
+	    	})
+		}
+		$(document).on('submit', '#signal',function(e){
+			e.preventDefault();
+	    $.ajax({
+	        type:'POST',
+	        url:'{% url "core:post" slug=product.slug %}',
+	        data:{
+	            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+	            action: 'signal',
+	            raison: $('#raison').val()
+	        },
+	        success:function(json){
+	        	if (document.getElementById('notif')){
+	        	closesuccess();
+	        	}
+	        	document.getElementById('signal').reset();
+				document.getElementById('modal').classList.toggle('is-active');
+				$('#maincontainer').prepend(
+					'<div class="column mx-6 my-3 has-background-success" id="notif">'+
+						'<b class="has-text-white">Cette publication à été signalée avec succés</b>'+
+						'<a onclick="closesuccess()">'+
+							'<span class="icon is-pulled-right has-text-black">'+
+								'<i class="fas fa-times"></i>'+
+							'</span>'+
+						'</a>'+
+					'</div>'
+			)
+	        },
+	    })})
+		$(document).on('submit', '#buyeridentif',function(e){
+			e.preventDefault();
+	    $.ajax({
+	        type:'POST',
+	        url:'{% url "core:post" slug=product.slug %}',
+	        data:{
+	            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+	            action: 'buyeridentif',
+	            place: $('input[name=place]:checked').val(),
+	            content: $('input[name=buyer]').val(),
+	        },
+	        success:function(json){
+	        	if(json.status == 'user_not_found'){
+	        		document.getElementById('user_not_found').style.display='block';
+	        	}else if (json.status == 'success'){
+	        		document.getElementById('formdesignate').style.display="none";
+	        		document.getElementById('form-footer').style.display="none";
+	        		document.getElementById('success-form').style.display="block";
+	        	}
+	        },
+	    })})
+	</script>
+{% endblock %}

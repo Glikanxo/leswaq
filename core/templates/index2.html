@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Leswaq{% endblock %}
+
+{% block content %}
+<style type="text/css">
+  	.hidden-scroll::-webkit-scrollbar{display: none;}
+  	.nav-left{left:10%}
+  	.nav-right{right:10%}
+  	.slide-item{display: inline-block;}
+  	.nav{position: absolute;margin-top: 90px;background: black; border-radius: 50%;padding: 5px}
+  	.box{background: none;box-shadow: none;text-align: left;margin-right: none}	
+  	.divers{display: inline-block;width: 24%;}
+	@media only screen and (max-width: 1024px){
+		.mx-6{
+			margin-left: 0!important;
+			margin-right: 0!important
+		}
+	  	.divers{width: 32%;}
+	  	.nav-left{left:10px}
+	  	.nav-right{right:10px}
+	  	.nav{margin-top: 60px}
+	}
+	@media only screen and (max-width: 768px){
+		.mx-6{
+			margin-left: 0!important;
+			margin-right: 0!important
+		}
+	  	.divers{width: 49%;}
+	  	.nav-left{left:10px}
+	  	.nav-right{right:10px}
+	  	.nav{margin-top: 60px}
+	}
+</style>
+<div class="container" style="padding-top: 50px">
+<figure class="image is-3by1">
+  <img src="{% static 'banner1.jpg' %}">
+</figure>
+	{% if urgences %}
+		<div class="mx-6">
+			<strong style="margin-left: 12.5%">Publications d'urgence</strong>
+	  		<div style="overflow-x: auto;white-space: nowrap;overflow-y: hidden; width: 75%;margin:0 auto;" class=" has-text-centered hidden-scroll" id="scrollcontent">
+	  			<div style="margin-top: 20px;">
+		  			<a class="nav has-text-white nav-left" id="nav-left">
+		  				<span class="icon">
+		                  <i class="fas fa-arrow-left"></i>
+		                </span>
+		            </a>
+		  			<a class="nav has-text-white nav-right" id="nav-right">
+		  				<span class="icon">
+		                  <i class="fas fa-arrow-right"></i>
+		                </span>
+		            </a>
+		            <div>
+			  			<div class="box column is-3 slide-item">
+			  				{% for i in urgences %}
+			  				<a href="{% url 'core:post' slug=i.slug %}">
+				  				<div class="image is-1by1">
+				  					<img loading="lazy" src="{{i.images.all.0.image.url}}">
+				  				</div>
+				  				<div>
+				  					<b class="is-size-5 title">{{i.title}}</b><br>
+				  					<b class="has-text-grey">{{i.prix}} DZD</b>
+				  				</div>
+			  				</a>
+			  				{% endfor %}
+			  			</div>
+		  			</div>
+		  		</div>
+	  		</div>
+		</div>
+	{% endif %}
+	{% if vendeur %}
+		<div class="mx-6" >
+			<strong style="margin-left: 12.5%">Publications de vendeurs en ligne</strong>
+	  		<div style="overflow-x: auto;white-space: nowrap;overflow-y: hidden; width: 75%;margin:0 auto;" class=" has-text-centered hidden-scroll" id="scrollcontent">
+	  			<div style="margin-top: 20px;">
+		  			<a class="nav has-text-white nav-left" id="nav-left">
+		  				<span class="icon">
+		                  <i class="fas fa-arrow-left"></i>
+		                </span>
+		            </a>
+		  			<a class="nav has-text-white nav-right" id="nav-right">
+		  				<span class="icon">
+		                  <i class="fas fa-arrow-right"></i>
+		                </span>
+		            </a>
+		            <div>
+		            	{% for i in vendeur %}
+			  				<a href="{% url 'core:post' slug=i.slug %}">
+				  			<div class="box column is-3 slide-item">
+				  				<div class="image is-1by1">
+				  					<img loading="lazy" src="{{i.images.all.0.image.url}}">
+				  				</div>
+				  				<div>
+				  					<b class="is-size-5 title">{{i.title}}</b><br>
+				  					<b class="has-text-grey">{{i.prix}} DZD</b>
+				  				</div>
+				  			</div>
+				  		</a>
+			  			{% endfor %}
+			  		</div>
+		  		</div>
+	  		</div>
+		</div>
+	{% endif %}
+</div>
+
+<figure class="image is-3by1">
+  <img src="{% static 'banner2.jpg' %}">
+</figure>
+
+	{% if divers %}
+		<div class="px-6">
+			<strong>Produits divers</strong>
+			<div class="mt-4">
+			</div>
+			{% for i in divers %}
+				<a href="{% url 'core:post' slug=i.slug %}">
+		  			<div class="box divers">
+		  				<div class="image is-4by5">
+		  					<img loading="lazy" src="{{i.images.all.0.image.url}}">
+		  				</div>
+		  				<div>
+		  					<b class="is-size-5 title">{{i.title}}</b><br>
+		  					<b class="has-text-grey">{{i.prix}} DZD</b>
+		  				</div>
+		  			</div>
+	  			</a>
+	  		{% endfor %}
+		</div>
+	{% endif %}
+
+<figure class="image is-3by1">
+  <img src="{% static 'banner3.jpg' %}">
+</figure>
+
+{% endblock %}
